@@ -1,79 +1,49 @@
-// const axios = require('axios');
+require('dotenv').config();
+const axios = require('axios');
+const jwt = require('jsonwebtoken');
 
+const generateJWT = () => {
+    const payload = {
+        iss: process.env.ZENVIA_SIGNATURE, // Substitua com o identificador do emissor
+        iat: Math.floor(Date.now() / 1000),
+    };
 
-// require('dotenv').config();  // Certifique-se de carregar o dotenv no início do arquivo
+    // Chave secreta ou privada (fornecida pela Zenvia ou configurada por você)
+    const secretKey = process.env.ZENVIA_API_KEY //|| "sua-chave-secreta"; // Defina sua chave secreta
 
-// const sendToWhatsApp = async (to, message) => {
-//     console.log('ZENVIA_API_KEY:', process.env.ZENVIA_API_KEY);
-//     const zenviaApiUrl = 'https://api.zenvia.com/v2/chats';  // Endpoint para v2
-//     const headers = {
-//         'Authorization': `Bearer ${process.env.ZENVIA_API_KEY.trim()}`,  // Garantir que o valor da chave esteja correto
-//         'Content-Type': 'application/json',
-//     };
-    
-    
-
-// //     const body = {
-// //         from: 'whatsapp:+5511995003578',  // Número de WhatsApp
-// //         to: 'whatsapp:+5511995000000',   // Número de destino
-// //         content: {
-// //             type: 'text',
-// //             text: message,               // Texto da mensagem
-// //         },
-// //     };
-
-// //     try {
-// //         const response = await axios.post(zenviaApiUrl, body, { headers });
-// //         console.log('Mensagem enviada:', response.data);
-// //     } catch (error) {
-// //         console.error('Erro ao enviar mensagem para WhatsApp:', error);
-// //     }
-// // };
-// const body = {
-//     from: 'whatsapp:+5511995003578',
-//     to: 'whatsapp:+5511995000000',
-//     content: {
-//         type: 'text',
-//         text: 'Olá, essa é uma mensagem de teste!',
-//     },
-// };
-
-// try {
-//     const response = await axios.post(zenviaApiUrl, body, { headers });
-//     console.log('Mensagem enviada:', response.data);
-// } catch (error) {
-//     console.error('Erro ao enviar mensagem:', error.response ? error.response.data : error.message);
-// }
-
-// }
-// module.exports = { sendToWhatsApp };
-// Certifique-se de que o axios está sendo importado corretamente
-
-require('dotenv').config();  // Carrega as variáveis de ambiente do arquivo .env
-const axios = require('axios');  
+    // Gera o token JWT com o algoritmo de assinatura
+    return jwt.sign(payload, secretKey, { algorithm: 'HS256' }); // Substitua 'HS256' por 'RS256', se necessário
+};
 
 const sendToWhatsApp = async (to, message) => {
-    const zenviaApiUrl = 'https://api.zenvia.com/v2/chats';  // Endpoint da Zenvia
+    const zenviaApiUrl = 'https://api.zenvia.com/v2/chats';
+
+    // Gera o token JWT
+    const token = generateJWT();
+
+    // Definindo os cabeçalhos com o token JWT gerado
     const headers = {
-        'Authorization': `Bearer ${process.env.ZENVIA_API_KEY}`,  // Com o token carregado corretamente
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
     };
-    
-    console.log('Bearer token enviado:', `Bearer ${process.env.ZENVIA_API_KEY}`);
-    console.log('ZENVIA_API_KEY:', process.env.ZENVIA_API_KEY);
 
+    console.log('Bearer token enviado:', headers.Authorization);
+    console.log('ZENVIA_SIGNATURE:', process.env.ZENVIA_SIGNATURE);
 
-
+    // Corpo da requisição com os dados da mensagem
     const body = {
-        from: 'whatsapp:+5511995003578',  // Seu número de WhatsApp
-        to: 'whatsapp:+5511995000000',    // Número de destino
+        from: 'whatsapp:+5511995003578',  // Substitua com seu número de origem
+        to: `whatsapp:+5511956553172`,  // O número de destino
         content: {
             type: 'text',
-            text: message,                // Texto da mensagem
+            text: message,  // A mensagem a ser enviada
         },
     };
 
+    console.log('Request body:', JSON.stringify(body, null, 2)); // Logando o corpo da requisição
+
     try {
+        // Enviando a requisição POST para a API da Zenvia
         const response = await axios.post(zenviaApiUrl, body, { headers });
         console.log('Mensagem enviada:', response.data);
     } catch (error) {

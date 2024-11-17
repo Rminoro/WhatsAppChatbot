@@ -57,8 +57,8 @@ app.get('/create-event', async (req, res) => {
             const eventDetails = {
                 summary: 'Team Meeting',
                 description: 'Discuss project status and tasks.',
-                startDateTime: '2024-12-05T10:00:00-03:00',
-                endDateTime: '2024-12-05T11:00:00-03:00',
+                startDateTime: '2024-12-06T10:00:00-03:00',
+                endDateTime: '2024-12-06T11:00:00-03:00',
             };
 
             const event = await createGoogleCalendarEvent(oAuth2Client, eventDetails);
